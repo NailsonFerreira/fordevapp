@@ -1,5 +1,6 @@
 import 'package:faker/faker.dart';
 import 'package:fordev/data/usecases/usecases.dart';
+import 'package:fordev/domain/helpers/helpers.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
@@ -23,15 +24,13 @@ void main() {
     sut = RemoteAuthentication(httpClient: httpClient, url: url);
   });
 
-  test("Should call HttpClient with curret URL", () async {
-
+  test("Should throw UnecpectedError if HttpClient returns 400", () async {
+    when(httpClient?.request(url: anyNamed("url"), method:anyNamed("method"), body: anyNamed("body")))
+    .thenThrow(HttpError.badRequest);
+    
     final params = AuthenticationParams(email: faker.internet.email(), secret: faker.internet.password());
-    await sut?.auth(params);
+    final future =  sut?.auth(params);
 
-    verify(httpClient?.request(
-      url: url,
-      method: "post",
-      body: {'email': params.email, 'password': params.secret}
-    ));
+    expect(future, throwsA(DomainError.unexpected));
   });
 }
