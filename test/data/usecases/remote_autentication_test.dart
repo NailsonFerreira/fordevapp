@@ -25,7 +25,7 @@ void main() {
     params = AuthenticationParams(email: faker.internet.email(), secret: faker.internet.password());
   });
 
-  test("Should throw UnecpectedError if HttpClient returns 400", () async {
+  test("Should throw UnexpectedError if HttpClient returns 400", () async {
     when(httpClient?.request(url: anyNamed("url"), method:anyNamed("method"), body: anyNamed("body")))
     .thenThrow(HttpError.badRequest);
 
@@ -34,7 +34,7 @@ void main() {
     expect(future, throwsA(DomainError.unexpected));
   });
 
-  test("Should throw UnecpectedError if HttpClient returns 400", () async {
+  test("Should throw UnexpectedError if HttpClient returns 400", () async {
     when(httpClient?.request(url: anyNamed("url"), method:anyNamed("method"), body: anyNamed("body")))
         .thenThrow(HttpError.notFound);
 
@@ -43,7 +43,7 @@ void main() {
     expect(future, throwsA(DomainError.unexpected));
   });
 
-  test("Should throw UnecpectedError if HttpClient returns 500", () async {
+  test("Should throw UnexpectedError if HttpClient returns 500", () async {
     when(httpClient?.request(url: anyNamed("url"), method:anyNamed("method"), body: anyNamed("body")))
         .thenThrow(HttpError.serverError);
 
@@ -69,5 +69,14 @@ void main() {
     final account = await  sut?.auth(params!);
 
     expect(account?.token, token);
+  });
+
+  test("Should throw UnexpectedError if HttpClient returns 200 with invalid data.", () async {
+    when(httpClient?.request(url: anyNamed("url"), method:anyNamed("method"), body: anyNamed("body")))
+        .thenAnswer((_) async => {'invalid_key': 'invalid_value'});
+
+    final future =  sut?.auth(params!);
+
+    expect(future, throwsA(DomainError.unexpected));
   });
 }
